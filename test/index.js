@@ -16,24 +16,31 @@ test('basic functionality', async (t) => {
 
   const indexHTML = fs.readFileSync(path.join(fixtures, 'index.html'))
   const localJS = fs.readFileSync(path.join(fixtures, 'main.js'))
+  const preloadJS = fs.readFileSync(path.join(fixtures, 'preload.js'))
   const localCSS = fs.readFileSync(path.join(fixtures, 'assets', 'style.css'))
   const remoteJS = await (await fetch('https://ar.al/chat.js')).buffer()
   const remoteCSS = await (await fetch('https://ar.al/style.css')).buffer()
 
+
   const localJSHash = createHash('sha384').update(localJS).digest().toString('base64')
+  const preloadJSHash = createHash('sha384').update(preloadJS).digest().toString('base64')
   const localCSSHash = createHash('sha384').update(localCSS).digest().toString('base64')
   const remoteJSHash = createHash('sha384').update(remoteJS).digest().toString('base64')
   const remoteCSSHash = createHash('sha384').update(remoteCSS).digest().toString('base64')
+  
 
   const expectedLocalCSSLinkTag = `<link rel="stylesheet" type="text/css" href="/assets/style.css" integrity="sha384-${localCSSHash}">`
   const expectedRemoteCSSLinkTag = `<link rel="stylesheet" type="text/css" href="https://ar.al/style.css" integrity="sha384-${remoteCSSHash}">`
   const expectedLocalJSScriptTag = `<script type="module" src="/main.js" integrity="sha384-${localJSHash}"></script>`
+  const expectedPreloadJSScriptTag = `<link rel="modulepreload" crossorigin="" href="/preload.js" integrity="sha384-${preloadJSHash}">`
   const expectedRemoteJSScriptTag = `<script type="module" src="https://ar.al/chat.js" integrity="sha384-${remoteJSHash}"></script>`
+  
 
   const context = {
     bundle: {
       'assets/style.css': { source: localCSS },
-      'main.js': { code: localJS }
+      'main.js': { code: localJS },
+      'preload.js': { code: preloadJS }
     }
   }
 
@@ -45,8 +52,11 @@ test('basic functionality', async (t) => {
 
   const html = await plugin.transformIndexHtml(indexHTML, context)
 
+  console.log(html)
+
   t.true(html.includes(expectedLocalCSSLinkTag), 'Transformed HTML includes expected local CSS link tag.')
   t.true(html.includes(expectedRemoteCSSLinkTag), 'Transformed HTML includes expected remote CSS link tag.')
   t.true(html.includes(expectedLocalJSScriptTag), 'Transformed HTML includes expected local JS link tag.')
+  t.true(html.includes(expectedPreloadJSScriptTag), 'Transformed HTML includes expected preload JS link tag.')
   t.true(html.includes(expectedRemoteJSScriptTag), 'Transformed HTML includes expected remote JS link tag.')
 })

@@ -58,9 +58,11 @@ export default function sri () {
       // Implement SRI for scripts and stylesheets.
       const scripts = $('script').filter('[src]')
       const stylesheets = $('link[rel=stylesheet]').filter('[href]')
+      const preloadScripts = $('link[rel=modulepreload]').filter('[href]')
 
       await scripts.asyncForEach(calculateIntegrityHashes)
       await stylesheets.asyncForEach(calculateIntegrityHashes)
+      await preloadScripts.asyncForEach(calculateIntegrityHashes)
 
       return $.html()
     }
