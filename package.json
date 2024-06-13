@@ -1,6 +1,9 @@
 {
   "name": "@taped/vite-plugin-sri",
   "version": "1.0.0",
+  "publishConfig": {
+		"access": "public"
+	},
   "description": "A Vite plugin that adds subresource integrity hashes to your index.html file at build time.",
   "type": "module",
   "main": "index.cjs",
